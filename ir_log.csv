@@ -1,0 +1,5 @@
+frame_id,source,phenomenon,affected_field,effect_on_label
+S02_ir,IR_sim,Xác Nhận: mô tả vì sao không xác định được dây an toàn của người ở rear_left trên IR; đối chiếu với RGB.,seatbelt,"Export hiện ghi IR: unknown; RGB: not_worn. Cần xác nhận lý do bằng quan sát từng ảnh, không suy nhãn từ ảnh còn lại."
+S04_ir,IR_sim,Xác Nhận: mô tả vùng dây an toàn của người trong ảnh; chi tiết nào không nhìn rõ?,seatbelt,Export hiện ghi unknown ở cả RGB và IR. Cần xác nhận nguyên nhân; đồng thời sửa seat=driver theo ghế thực tế trên CVAT.
+S06_ir,IR_sim,Xác Nhận: bên trong ghế trẻ em ở rear_right có nhìn đủ rõ để xác định ghế trống không?,occupied,Export hiện ghi no ở cả RGB và IR. Chỉ giữ no nếu thấy ghế trống; nếu không thấy rõ bên trong thì unknown.
+S08_ir,IR_sim,Xác Nhận: mô tả chi tiết hình dạng hoặc hướng ghế em bé ở rear_right giúp xác định hướng ghế trên IR.,facing,Export hiện ghi front ở cả RGB và IR. Cần kiểm lại hướng ghế theo xe trực tiếp trên từng ảnh.

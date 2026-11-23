@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 12 Lab — DMS &amp; OMS: gán nhãn cabin RGB + IR · Timer &amp; Hướng dẫn Lab</title>
+<style>
+  :root{
+    --bg:#f5f3ee; --card:#fffdf9; --ink:#1d1c1a; --muted:#6c675e; --line:#e3ded3; --soft:#efebe3;
+    --warn:#c2410c; --warn-bg:#fff4e8; --warn-line:#f3c9a3;
+    --over:#b91c1c; --over-bg:#fff1f1; --over-line:#f2b8b8;
+    --ok:#15803d; --ok-bg:#dcfce7; --ok-line:#86efac;
+    --info-bg:#eff6ff; --info-line:#bfdbfe; --info-ink:#1d4ed8;
+    --code-bg:#1f1e1b; --code-ink:#f3efe6; --code-bar:#2e2c28;
+    --pc:#2563eb;
+    --sans:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    --mono:"JetBrains Mono","Cascadia Code",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  html[data-theme="dark"]{
+    --bg:#141311; --card:#1d1c19; --ink:#f3efe6; --muted:#aca598; --line:#34312b; --soft:#282520;
+    --warn:#fb923c; --warn-bg:#2e1d10; --warn-line:#7c3a16;
+    --over:#f87171; --over-bg:#331515; --over-line:#7f2525;
+    --ok:#4ade80; --ok-bg:#112a1a; --ok-line:#1f6f3b;
+    --info-bg:#162235; --info-line:#28456e; --info-ink:#93c5fd;
+    --code-bg:#0d0c0a; --code-ink:#f3efe6; --code-bar:#24221e;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55}
+  a{color:color-mix(in srgb,var(--pc) 85%,var(--ink));text-decoration:none}
+  a:hover{text-decoration:underline}
+  button,input{font-family:inherit;font-size:inherit}
+  code{font-family:var(--mono);font-size:.86em;background:var(--soft);border:1px solid var(--line);padding:.08em .38em;border-radius:5px;overflow-wrap:break-word}
+  @media (min-width:600px), print{.nw{white-space:nowrap}}
+  .wrap{max-width:1360px;margin:0 auto;padding:18px 22px 44px}
+
+  /* ---------- top bar ---------- */
+  .top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+  .title{flex:1 1 320px}
+  .title-badges{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+  .tbadge{font-family:var(--mono);font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--soft);border:1px solid var(--line);color:var(--muted)}
+  .title h1{margin:0;font-size:20px;font-weight:800;letter-spacing:-.01em}
+  .title p{margin:2px 0 0;color:var(--muted);font-size:13px}
+  .controls{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+  .btn{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:7px 11px;border-radius:9px;cursor:pointer;font-weight:600;font-size:13px;transition:background .15s,border-color .15s;display:inline-flex;align-items:center;gap:5px}
+  .btn:hover{border-color:var(--muted);background:var(--soft)}
+  .btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink);min-width:116px;justify-content:center}
+  .btn.primary:hover{opacity:.9;background:var(--ink)}
+  .btn.danger{color:var(--over)}
+  .btn.on{background:var(--soft);border-color:var(--muted)}
+  .sync{display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);border-radius:9px;padding:3px 4px 3px 10px;font-size:13px;color:var(--muted)}
+  .sync input{border:0;background:transparent;font-weight:600;color:var(--ink);width:94px}
+  .sync .btn{padding:4px 9px}
+
+  /* ---------- hero ---------- */
+  .hero{display:grid;grid-template-columns:1.5fr 1fr;gap:14px;margin-bottom:14px}
+  .now{background:var(--card);border:1px solid var(--line);border-left:8px solid var(--pc);border-radius:16px;padding:18px 22px;position:relative;overflow:hidden}
+  .now.warn{background:var(--warn-bg);border-color:var(--warn-line);border-left-color:var(--warn)}
+  .now.over{background:var(--over-bg);border-color:var(--over-line);border-left-color:var(--over)}
+  .now .lab{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-weight:700;padding-right:110px}
+  .cpb{display:inline-block;background:var(--pc);color:#fff;font-weight:800;font-size:12px;padding:2px 9px;border-radius:999px;letter-spacing:.03em}
+  .mode{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;border:1px solid var(--line);background:var(--soft);color:var(--muted)}
+  .mode.indep{color:var(--warn);border-color:var(--warn-line);background:var(--warn-bg)}
+  .mode.ai{color:#7c3aed;border-color:color-mix(in srgb,#7c3aed 35%,var(--line));background:color-mix(in srgb,#7c3aed 10%,var(--card))}
+  .mode.review{color:#0f766e;border-color:color-mix(in srgb,#0f766e 35%,var(--line));background:color-mix(in srgb,#0f766e 10%,var(--card))}
+  .mode.setup{color:#475569;border-color:color-mix(in srgb,#475569 30%,var(--line));background:var(--soft)}
+  html[data-theme="dark"] .mode.ai{color:#c4b5fd}
+  html[data-theme="dark"] .mode.review{color:#5eead4}
+  html[data-theme="dark"] .mode.setup{color:#cbd5e1}
+  .phase-name{font-size:24px;font-weight:800;letter-spacing:-.01em}
+  .big{font-family:var(--mono);font-weight:700;font-size:94px;line-height:1.02;letter-spacing:-.02em;margin:8px 0 4px;font-variant-numeric:tabular-nums}
+  .now.warn .big{color:var(--warn)}
+  .now.over .big{color:var(--over)}
+  .sub{color:var(--muted);font-size:14px}
+  .sub b{color:var(--ink)}
+  .pbar{height:8px;background:var(--soft);border-radius:99px;margin-top:12px;overflow:hidden}
+  .pbar i{display:block;height:100%;width:0;background:var(--pc);border-radius:99px;transition:width .25s linear}
+  .state-pill{position:absolute;top:16px;right:18px;font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px;background:var(--soft);color:var(--muted)}
+  .state-pill.run{background:var(--ok-bg);color:var(--ok)}
+
+  .totals{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 20px;display:grid;grid-template-columns:1fr 1fr;gap:12px 18px;align-content:start}
+  .stat .k{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+  .stat .v{font-family:var(--mono);font-size:30px;font-weight:700;font-variant-numeric:tabular-nums}
+  .stat.wide{grid-column:1/-1}
+  .next{border-top:1px dashed var(--line);padding-top:10px;font-size:14px}
+
+  /* ---------- timeline ---------- */
+  .timeline{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px 32px;margin-bottom:14px}
+  .tl-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--muted);font-weight:600;margin-bottom:8px}
+  .prep-pill{padding:3px 9px;font-size:11.5px;border-radius:999px}
+  .track{position:relative;display:flex;height:46px;border-radius:10px;overflow:visible}
+  .seg{position:relative;height:100%;border-right:2px solid var(--card);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-direction:column;color:#fff;font-size:11.5px;font-weight:700;line-height:1.15;text-align:center;overflow:hidden;opacity:.62;transition:opacity .2s;padding:0 2px}
+  .seg:first-child{border-radius:10px 0 0 10px}
+  .seg:last-child{border-radius:0 10px 10px 0;border-right:0}
+  .seg.done{opacity:.38}
+  .seg.cur{opacity:1}
+  .seg.sel{outline:3px solid var(--ink);outline-offset:-3px;opacity:1}
+  .seg small{font-weight:500;opacity:.92;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  .needle{position:absolute;top:-6px;bottom:-6px;width:3px;background:var(--ink);border-radius:2px;left:0;pointer-events:none;transition:left .25s linear}
+  .needle::after{content:"";position:absolute;top:-6px;left:-5px;border:6.5px solid transparent;border-top-color:var(--ink)}
+  .ticks{position:relative;height:0}
+  .tick{position:absolute;top:6px;transform:translateX(-50%);font-size:10.5px;color:var(--muted);font-weight:600;white-space:nowrap;text-align:center;line-height:1.2}
+  .tick b{display:block;color:var(--ink);font-size:10.5px}
+
+  /* ---------- main layout & stepper/TOC ---------- */
+  .layout{display:grid;grid-template-columns:288px 1fr;gap:16px;align-items:start}
+  .stepper{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px;position:sticky;top:12px;max-height:calc(100vh - 24px);overflow-y:auto}
+  .step{display:grid;grid-template-columns:46px 1fr auto;gap:8px;align-items:center;padding:8px 10px;border-radius:11px;cursor:pointer;border:1px solid transparent}
+  .step:hover{background:var(--soft)}
+  .step.sel{background:var(--soft);border-color:var(--line)}
+  .step .dot{font-size:11px;font-weight:800;color:#fff;border-radius:8px;padding:5px 0;text-align:center}
+  .step .nm{font-weight:700;font-size:13.5px;line-height:1.25}
+  .step .tm{font-size:11.5px;color:var(--muted);font-weight:500}
+  .step .cnt{font-size:11.5px;color:var(--muted);font-weight:700;font-family:var(--mono)}
+  .step.cur .nm::after{content:" ●";color:var(--ok);font-size:11px}
+  .step.done .nm{color:var(--muted)}
+  .follow{margin:6px 0 8px;width:100%;justify-content:center}
+  .toc-box{border-top:1px dashed var(--line);margin-top:8px;padding-top:10px}
+  .toc-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 6px 6px}
+  .toc-link{display:block;padding:4px 8px;border-radius:7px;font-size:12.5px;color:var(--muted);line-height:1.35}
+  .toc-link:hover{background:var(--soft);color:var(--ink);text-decoration:none}
+  .toc-link.sub{padding-left:18px;font-size:12px}
+  .toc-link.active{background:var(--soft);color:var(--ink);font-weight:700}
+
+  /* ---------- active phase panel ---------- */
+  #panelHost{display:flex;flex-direction:column;gap:18px;min-width:0}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 24px;border-top:6px solid var(--pc);min-width:0}
+  .p-head{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+  .p-head h2{margin:0;font-size:22px;font-weight:800;letter-spacing:-.01em;flex:1 1 auto}
+  .p-meta{color:var(--muted);font-size:13.5px;margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .p-actions{display:flex;gap:6px}
+  .goalbox{background:color-mix(in srgb,var(--pc) 9%,var(--card));border:1px solid color-mix(in srgb,var(--pc) 32%,var(--card));border-radius:13px;padding:14px 16px;margin-bottom:16px}
+  .goalbox h3{margin:0 0 6px;font-size:13.5px;text-transform:uppercase;letter-spacing:.06em;color:color-mix(in srgb,var(--pc) 80%,var(--ink))}
+  .cols{display:grid;grid-template-columns:1.25fr 1fr;gap:18px}
+  .sec{margin-bottom:16px}
+  .sec h3{margin:0 0 8px;font-size:12.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+  ul.chk{list-style:none;margin:0;padding:0}
+  ul.chk li{display:grid;grid-template-columns:22px 1fr;gap:8px;padding:6px 0;border-bottom:1px solid var(--soft);align-items:start}
+  ul.chk li:last-child{border-bottom:0}
+  ul.chk input{width:17px;height:17px;margin:3px 0 0;accent-color:var(--pc);cursor:pointer}
+  ul.chk li.checked span{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--muted)}
+  ul.chk .num{font-weight:800;color:var(--pc);margin-right:4px}
+  ul.plain{margin:0;padding-left:18px}
+  ul.plain li{margin:5px 0}
+  .q{background:var(--soft);border-radius:12px;padding:12px 14px;font-size:14.5px}
+  .q b.qtitle{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px}
+  .cmd{display:flex;align-items:stretch;margin:8px 0;border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+  .cmd pre{margin:0;flex:1;background:var(--code-bg);color:var(--code-ink);font-family:var(--mono);font-size:12.6px;padding:10px 12px;white-space:pre-wrap;overflow-wrap:break-word;overflow-x:auto}
+  .cmd button{border:0;background:var(--code-bar);color:#e5dfd2;font-weight:700;font-size:12px;padding:0 12px;cursor:pointer;min-width:68px;flex-shrink:0}
+  .cmd button:hover{background:var(--pc);color:#fff}
+  .cmd .cm{display:block;color:#a8a294;font-size:11.5px;margin-bottom:3px}
+  .note{border-left:3px solid var(--warn);background:var(--warn-bg);padding:9px 12px;border-radius:0 10px 10px 0;margin:6px 0;font-size:14px}
+  .rub{font-size:13.5px;color:var(--muted);background:var(--soft);padding:10px 12px;border-radius:10px}
+  .rub strong{color:var(--ink)}
+
+  /* ---------- deep walkthrough inside phase ---------- */
+  .deep-wrap{margin-top:18px;padding-top:16px;border-top:2px dashed var(--line)}
+  .deep-banner{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+  .deep-banner h3{margin:0;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+  .deep-h{font-size:16.5px;font-weight:800;margin:20px 0 8px;color:var(--ink);scroll-margin-top:18px}
+  .deep-ol{padding-left:20px;margin:8px 0 14px}
+  .deep-ol li{margin:7px 0}
+  .sub-li{margin-top:4px;padding-left:10px;color:var(--muted);font-size:14px}
+  .callout{margin:14px 0;padding:12px 15px;border-radius:10px;border-left:4px solid var(--info-ink);background:var(--info-bg)}
+  .callout-warning{border-left-color:var(--warn);background:var(--warn-bg)}
+  .callout-danger{border-left-color:var(--over);background:var(--over-bg)}
+  .callout-success{border-left-color:var(--ok);background:var(--ok-bg)}
+  .callout-title{font-weight:800;font-size:14px;margin-bottom:4px}
+  .callout-body p:first-child{margin-top:0}
+  .callout-body p:last-child{margin-bottom:0}
+  .checklist-box{margin:14px 0;padding:12px 15px;border-radius:11px;border:1px solid var(--line);background:var(--soft)}
+  .checklist-success{border-color:var(--ok-line);background:var(--ok-bg)}
+  .checklist-title{font-weight:800;font-size:14px;margin-bottom:6px}
+  .repo-card{margin:14px 0;padding:14px 16px;border-radius:12px;border:1px solid var(--line);background:var(--soft)}
+  .repo-label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:800}
+  .repo-title{font-size:15.5px;font-weight:800;margin:2px 0 4px}
+  .repo-url{margin-bottom:8px}
+  .repo-links{display:flex;gap:8px;flex-wrap:wrap}
+  .repo-pill{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  .repo-pill:hover{text-decoration:none;opacity:.9}
+  .code-tabs{margin:14px 0;border:1px solid var(--line);border-radius:11px;overflow:hidden;background:var(--card)}
+  .code-tabs-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:8px 12px;background:var(--soft);border-bottom:1px solid var(--line)}
+  .code-tabs-title{font-size:13px;font-weight:700}
+  .tab-btns{display:flex;gap:6px}
+  .tab-btn{cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--muted);padding:4px 10px;border-radius:7px;font-size:12.5px;font-weight:700}
+  .tab-btn.active{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  .tab-panel{display:none}
+  .tab-panel.active{display:block}
+  .tab-panel .cmd{margin:0;border:0;border-radius:0}
+
+  /* ---------- figures & lightbox ---------- */
+  .lab-figure{margin:14px 0;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--soft);text-align:center}
+  .lab-figure img{max-width:100%;height:auto;border-radius:8px;cursor:zoom-in;display:block;margin:0 auto;box-shadow:0 3px 12px rgba(0,0,0,.08)}
+  .lab-figure figcaption{margin-top:8px;font-size:13px;color:var(--muted)}
+  .lightbox{display:none;position:fixed;inset:0;z-index:100;background:rgba(15,14,12,.92);align-items:center;justify-content:center;flex-direction:column;padding:24px}
+  .lightbox.open{display:flex}
+  .lightbox img{max-width:92vw;max-height:80vh;border-radius:10px;box-shadow:0 12px 42px rgba(0,0,0,.6)}
+  .lightbox-cap{color:#f3efe6;margin-top:12px;font-size:14px;text-align:center;max-width:860px}
+  .lightbox-idx{color:#aca598;font-family:var(--mono);font-size:12px;margin-top:4px}
+  .lb-btn{position:fixed;cursor:pointer;background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:999px;width:44px;height:44px;font-size:22px;display:flex;align-items:center;justify-content:center}
+  .lb-btn:hover{background:rgba(255,255,255,.28)}
+  .lb-close{top:18px;right:22px}
+  .lb-prev{left:20px;top:50%;transform:translateY(-50%)}
+  .lb-next{right:20px;top:50%;transform:translateY(-50%)}
+
+  /* ---------- reference & troubleshooting cards ---------- */
+  .ref{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px}
+  .refcard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 20px;min-width:0;overflow-x:auto}
+  .refcard.wide{grid-column:1/-1}
+  .refcard.wide td:first-child{width:35%;padding-right:14px}
+  .refcard.wide td code{word-break:normal;overflow-wrap:anywhere}
+  @media (max-width:599px){.refcard.wide table{table-layout:fixed}}
+  .refcard h3{margin:0 0 10px;font-size:15px;font-weight:800}
+  table{border-collapse:collapse;width:100%;font-size:13.5px}
+  td,th{padding:7px 6px;border-bottom:1px solid var(--soft);vertical-align:top;text-align:left}
+  .ref-thresh td:last-child{text-align:right;font-weight:700;font-family:var(--mono);font-size:12.5px;white-space:nowrap}
+  .kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:0 5px;background:var(--card);color:var(--ink)}
+  .foot{margin-top:16px;color:var(--muted);font-size:12.5px;text-align:center}
+
+  /* ---------- toast ---------- */
+  .toast{position:fixed;left:50%;top:18px;transform:translate(-50%,-150%);background:var(--ink);color:var(--bg);padding:14px 20px;border-radius:14px;font-weight:700;font-size:15.5px;box-shadow:0 12px 40px rgba(0,0,0,.28);z-index:80;transition:transform .35s cubic-bezier(.2,.9,.3,1.2);max-width:min(720px,92vw);display:flex;gap:14px;align-items:center}
+  .toast.show{transform:translate(-50%,0)}
+  .toast.warn{background:var(--warn);color:#fff}
+  .toast.go{background:var(--ok);color:#fff}
+  .toast button{background:rgba(255,255,255,.2);border:0;color:#fff;font-weight:700;border-radius:8px;padding:5px 10px;cursor:pointer}
+
+  /* ---------- presentation mode ---------- */
+  body.present .stepper,body.present .ref,body.present .hide-present,body.present .deep-wrap,body.present .foot{display:none}
+  body.present .layout{grid-template-columns:1fr}
+  body.present .big{font-size:150px}
+  body.present .phase-name{font-size:32px}
+  body.present .panel{font-size:18px}
+  body.present ul.chk li{padding:8px 0}
+  body.present .cols{grid-template-columns:1.2fr 1fr}
+
+  [hidden]{display:none !important}
+
+  @media (max-width:980px){
+    .hero,.layout,.cols,.ref{grid-template-columns:1fr}
+    .stepper{position:static;max-height:none}
+    .big{font-size:70px}
+    .seg{font-size:0}.seg small{font-size:0}
+  }
+  @media (max-width:720px){
+    .timeline{padding-bottom:62px}
+    .tick{font-size:9.5px}
+    .tick b{font-size:9.5px}
+    .tick.tick-stagger{top:30px}
+    .tick.tick-stagger::before{content:"";position:absolute;left:50%;top:-24px;width:1px;height:22px;background:color-mix(in srgb,var(--muted) 45%,transparent)}
+    .tick.tick-cp6{transform:translateX(-50%) !important}
+    .tick.tick-cp6::before{left:50%}
+  }
+
+  /* ---------- print / PDF export ---------- */
+  @page{size:A4;margin:13mm 12mm 14mm 12mm}
+  @media print{
+    :root{--bg:#fff;--card:#fff;--ink:#1d1c1a;--muted:#5c574f;--line:#dcd6ca;--soft:#f4f1ea}
+    html,body{background:#fff !important;color:#1d1c1a !important;font-size:12.5px;line-height:1.48;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .wrap{max-width:none;padding:0}
+    .controls,.hero,.p-actions,.stepper,.follow,.cmd button,.tab-btns,.toast,.lightbox,.deep-banner button,#tlPct,.needle,.kbd-hint,.tl-interactive-hint,.prep-pill{display:none !important}
+    .wall-clock-wrap{display:none !important}
+    .timeline{padding:10px 12px 28px;margin-bottom:12px;background:#fffdf9 !important;break-inside:avoid}
+    .track{height:32px}
+    .tick{top:6px !important;font-size:10.5px !important}
+    .tick b{font-size:10.5px !important}
+    .tick::before{display:none !important}
+    .tick.tick-cp6{transform:translateX(-100%) !important}
+    .seg{opacity:1 !important;outline:none !important;font-size:10.5px !important}
+    .seg small{display:none !important}
+    .layout{display:block}
+    #panelHost{display:block}
+    .panel{margin-bottom:14px;padding:14px 16px;background:#fff !important;border-radius:12px}
+    .cols{display:block}
+    .deep-slot{display:block !important}
+    .tab-panel{display:block !important;border-bottom:1px solid #3c3932}
+    .tab-panel:last-child{border-bottom:0}
+    .goalbox,.callout,.checklist-box,.repo-card,.cmd,.code-tabs,.lab-figure,.note,.q,.refcard,tr{break-inside:avoid}
+    h2,h3,.deep-h,.p-head,.deep-banner{break-after:avoid}
+    .lab-figure{margin:10px 0;padding:8px}
+    .lab-figure img{max-height:95mm;width:auto;max-width:100%;box-shadow:none}
+    .ref{display:block;margin-top:12px}
+    .refcard{margin-bottom:12px;background:#fff !important}
+    pre{font-size:11px !important;padding:8px 10px !important}
+    a{color:#1d4ed8 !important;text-decoration:none}
+    a.repo-pill{background:#fff !important;color:#1d4ed8 !important;border:1.5px solid #1d4ed8 !important}
+  }
+  body.print-mode{background:#fff !important;color:#1d1c1a !important}
+  body.print-mode .controls,body.print-mode .hero,body.print-mode .p-actions,body.print-mode .stepper,body.print-mode .follow,body.print-mode .cmd button,body.print-mode .tab-btns,body.print-mode .toast,body.print-mode .deep-banner button,body.print-mode #tlPct,body.print-mode .needle,body.print-mode .wall-clock-wrap,body.print-mode .kbd-hint,body.print-mode .tl-interactive-hint,body.print-mode .seg small,body.print-mode .prep-pill{display:none !important}
+  body.print-mode .layout{display:block}
+  body.print-mode .cols{display:block}
+  body.print-mode .ref{display:block}
+  body.print-mode .refcard{margin-bottom:12px;background:#fff !important}
+  body.print-mode .tab-panel{display:block !important;border-bottom:1px solid #3c3932}
+  body.print-mode .tab-panel:last-child{border-bottom:0}
+  body.print-mode .deep-slot{display:block !important}
+  body.print-mode .seg{opacity:1 !important;outline:none !important}
+  body.print-mode .lab-figure img{max-height:95mm;width:auto;max-width:100%}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div class="title">
+      <div class="title-badges">
+        <span class="tbadge">D12</span>
+        <span class="tbadge">cá nhân hoặc nhóm 2–4</span>
+        <span class="tbadge">22 ảnh · 180 phút trên lớp</span>
+      </div>
+      <h1>Day 12 Lab — DMS &amp; OMS: gán nhãn khung hình cabin RGB + IR</h1>
+      <p>14:00–17:00 · CVAT local · Guideline Cabin v1.0 · SVIRO (OMS) + Drive&amp;Act (DMS) · <code>cabin_check</code> · review chéo · IR log</p>
+    </div>
+    <div class="controls">
+      <button class="btn primary" id="bStart" title="Phím tắt: Space">▶ Bắt đầu</button>
+      <button class="btn" data-adj="-5" title="Lùi 5 phút">−5′</button>
+      <button class="btn" data-adj="-1" title="Lùi 1 phút">−1′</button>
+      <button class="btn" data-adj="1" title="Tiến 1 phút">+1′</button>
+      <button class="btn" data-adj="5" title="Tiến 5 phút">+5′</button>
+      <label class="sync" title="Nhập giờ lớp thực sự bắt đầu để đồng bộ đồng hồ">
+        Bắt đầu lúc <input type="time" id="syncTime"><button class="btn" id="bSync">Đồng bộ</button>
+      </label>
+      <button class="btn" id="bViewAll" title="Chuyển giữa chế độ từng pha và xem toàn bộ">📖 Xem tất cả</button>
+      <button class="btn" id="bTheme" title="Phím tắt: T">🌙 Tối</button>
+      <button class="btn" id="bSound" title="Bật/tắt âm báo">🔔 Âm báo</button>
+      <button class="btn" id="bPresent" title="Phím tắt: P">🖥 Trình chiếu</button>
+      <button class="btn" id="bFull" title="Phím tắt: F">⛶</button>
+      <button class="btn danger" id="bReset">↺ Đặt lại</button>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="now" id="now">
+      <span class="state-pill" id="statePill">Chưa bắt đầu</span>
+      <div class="lab"><span class="cpb" id="nowCp">CP1</span><span class="phase-name" id="nowName">Pha 1 · Dựng project &amp; task CVAT</span><span class="mode" id="nowMode"></span></div>
+      <div class="big" id="nowLeft">15:00</div>
+      <div class="sub" id="nowSub">Còn lại tới mốc CP1</div>
+      <div class="pbar"><i id="nowBar"></i></div>
+    </div>
+    <div class="totals">
+      <div class="stat"><div class="k">Đã trôi</div><div class="v" id="tElapsed">0:00:00</div></div>
+      <div class="stat"><div class="k">Còn lại (tổng)</div><div class="v" id="tLeft">3:00:00</div></div>
+      <div class="stat"><div class="k">Giờ hiện tại</div><div class="v" id="tClock">--:--</div></div>
+      <div class="stat"><div class="k">Dự kiến kết thúc</div><div class="v" id="tEnd">--:--</div></div>
+      <div class="stat wide next" id="tNext"></div>
+    </div>
+  </div>
+
+  <div class="timeline">
+    <div class="tl-head">
+      <span>Tiến độ 180 phút trên lớp (CP1 → Nộp bài)<span class="tl-interactive-hint"> — bấm vào từng pha để xem chi tiết &amp; checklist</span></span>
+      <span style="display:flex;align-items:center;gap:8px">
+        <button type="button" class="btn prep-pill" onclick="select(0,true)" title="Xem phần chuẩn bị trước buổi học (T-3 ngày)">🔧 Xem Pha 0 · Trước lớp (T-3 ngày)</button>
+        <span id="tlPct">0%</span>
+      </span>
+    </div>
+    <div class="track" id="track"><div class="needle" id="needle"></div></div>
+    <div class="ticks" id="ticks"></div>
+  </div>
+
+  <div class="layout">
+    <aside class="stepper" id="stepper"></aside>
+    <div id="panelHost"></div>
+  </div>
+
+  <div id="deepArchive" hidden></div>
+
+  <div class="ref" id="refSection">
+    <div class="refcard">
+      <h3>📏 Ngưỡng và con số cần nhớ</h3>
+      <table class="ref-thresh">
+        <tr><td>Số ảnh cốt lõi</td><td>22 (S01–S08 rgb+ir = 16, D01–D06 = 6)</td></tr>
+        <tr><td>Mỗi ảnh có đúng bao nhiêu tag <code>frame_meta</code></td><td>1</td></tr>
+        <tr><td>Chiều rộng mặt tối thiểu để vẽ <code>face13</code></td><td>≥ 60 px</td></tr>
+        <tr><td>Checkpoint A / B (dùng <code>--only</code>, <code>--expect</code>)</td><td>S01,S02 (4 ảnh) / D01,D02 (2 ảnh)</td></tr>
+        <tr><td>Kiểm lần cuối</td><td><code>--expect 22</code> → <code>Kết quả: 0 lỗi</code></td></tr>
+        <tr><td>Số dòng <code>disagreement_log.csv</code> tối thiểu</td><td>5 (hoặc tất cả nếu ít hơn)</td></tr>
+        <tr><td>Số quan sát <code>ir_log.csv</code> tối thiểu</td><td>4</td></tr>
+        <tr><td>Số lớp <code>class_list_v0.md</code></td><td>≥ 6 DMS + ≥ 6 OMS + 2 câu hỏi leo thang</td></tr>
+      </table>
+    </div>
+    <div class="refcard">
+      <h3>⚖️ Quy tắc vàng</h3>
+      <ul class="plain">
+        <li><b>Ghế gọi theo xe:</b> ảnh bên trái = <code>rear_right</code> vì camera nhìn về phía sau.</li>
+        <li><b>Trái/phải theo người:</b> ảnh D## xoay ~90° nhưng vẫn tính theo người lái.</li>
+        <li><b>Không thấy thì <code>unknown</code>:</b> không đoán, không suy từ ảnh còn lại của cặp RGB/IR.</li>
+        <li><b>SVIRO không có <code>worn_*</code>:</b> <code>seatbelt</code> chỉ là <code>not_worn</code> hoặc <code>unknown</code>.</li>
+        <li><b>Ảnh không rời máy bạn:</b> không commit, không chat, không đưa cho công cụ AI.</li>
+        <li><b>Chỉ dùng <code>scripts/</code> của repo:</b> không dùng <code>Gxx/scripts/</code>.</li>
+        <li><b>Nộp:</b> LMS aithucchien.vinuni.edu.vn, hạn 12:00 trưa hôm sau (GMT+7).</li>
+      </ul>
+      <p class="kbd-hint" style="margin:12px 0 0;font-size:12.5px;color:var(--muted)">
+        Phím tắt: <span class="kbd">Space</span> chạy/dừng · <span class="kbd">←</span><span class="kbd">→</span> pha trước/sau ·
+        <span class="kbd">T</span> sáng/tối · <span class="kbd">P</span> trình chiếu · <span class="kbd">F</span> toàn màn hình
+      </p>
+    </div>
+    <div class="refcard wide">
+      <h3>🛠️ Lỗi hay gặp và cách gỡ</h3>
+      <table>
+        <tr><td><code>python</code> mở Microsoft Store (Windows)</td><td>Cài Python từ python.org, tick <b>Add python.exe to PATH</b>. Trên macOS/Linux dùng <code>python3</code>.</td></tr>
+        <tr><td>Báo cáo <code>--out</code> bị lỗi tiếng Việt khi dùng <code>&gt;</code></td><td>Luôn dùng <code>--out file.txt</code> (ghi UTF-8), không dùng chuyển hướng <code>&gt;</code> trên Windows.</td></tr>
+        <tr><td><code>--only</code> báo không khớp (mã thoát 2)</td><td>Dùng mã đúng 2 chữ số: <code>S01</code>, <code>D01</code> (không phải <code>S1</code> hay tiền tố <code>S0</code>).</td></tr>
+        <tr><td><code>localhost:8080</code> trắng trang hoặc 502</td><td>Server chưa khởi động xong; chờ 1–2 phút, <code>docker compose ps</code> xem container nào Restarting.</td></tr>
+        <tr><td><code>port is already allocated</code> (8080)</td><td>Có chương trình khác dùng cổng 8080; tắt nó hoặc hỏi coach.</td></tr>
+        <tr><td>Không thấy file export</td><td>Trang <b>Requests</b>: chờ <b>Finished</b>, bấm ⋮ → <b>Download</b>.</td></tr>
+        <tr><td>Export có chứa ảnh (zip quá lớn)</td><td>Export lại, tắt <b>Save images</b>. <code>python -m zipfile -l</code> chỉ nên thấy <code>annotations.xml</code>.</td></tr>
+        <tr><td>Đừng chạy <code>docker compose down -v</code></td><td>Cờ <code>-v</code> xóa luôn dữ liệu gán nhãn; chỉ dùng <code>down</code> khi cần tắt.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="foot">
+    Chuẩn hóa theo <code>K5-L2-Day12-DMS-OMS</code> (<a href="GUIDE.md" target="_blank">GUIDE.md</a>, <a href="CHECKPOINTS.md" target="_blank">CHECKPOINTS.md</a>, <a href="RUBRIC.md" target="_blank">RUBRIC.md</a>, <a href="SUBMISSION.md" target="_blank">SUBMISSION.md</a>, <a href="COMMON_ERRORS.md" target="_blank">COMMON_ERRORS.md</a>). Thời gian từng pha là ước lượng của coach, điều chỉnh theo lớp bằng các nút ±1′/±5′.
+  </div>
+</div>
+
+
+<div class="toast" id="toast"><span id="toastMsg"></span><button type="button" id="toastX">OK</button></div>
+
+<div class="lightbox" id="lightbox" onclick="if(event.target===this) closeLightbox()">
+  <button type="button" class="lb-btn lb-close" onclick="closeLightbox()" aria-label="Đóng">×</button>
+  <button type="button" class="lb-btn lb-prev" onclick="stepLightbox(-1)" aria-label="Ảnh trước">‹</button>
+  <img id="lbImg" src="" alt="">
+  <div class="lightbox-cap" id="lbCap"></div>
+  <div class="lightbox-idx" id="lbIdx"></div>
+  <button type="button" class="lb-btn lb-next" onclick="stepLightbox(1)" aria-label="Ảnh sau">›</button>
+</div>
+
+<script>
+const TOTAL = 180;
+const PHASES = [
+  {
+    id:"cp0", cp:"CP0", pha:"Pha 0", name:"Chuẩn bị trước buổi học",
+    start:0, dur:0, prepLabel:"Trước lớp · T-3 ngày", mode:"setup", color:"#5b6b82",
+    goals:[
+      "Mở được `http://localhost:8080` và đăng nhập CVAT (v2.82.0)",
+      "Có `.venv` và chạy được `python scripts/cabin_check.py --help`",
+      "Thư mục `Gxx/` (gói ảnh của nhóm) đã chép vào trong repo học viên"
+    ],
+    tasks:[
+      "Làm theo `INSTALL_CVAT.md`: cài Docker Desktop, `git clone --branch v2.82.0 https://github.com/cvat-ai/cvat`, `docker compose up -d`",
+      "Tạo tài khoản quản trị CVAT (mật khẩu chỉ dùng cho máy bạn)",
+      "Gửi coach ảnh chụp trang đăng nhập hoặc trang Projects trống (ảnh chụp màn hình duy nhất trong cả lab)",
+      "Clone repo học viên, tạo `.venv`, giải nén `Gxx.zip` và chép `Gxx/` vào repo"
+    ],
+    cmds:[
+      {m:"Windows (PowerShell) — môi trường Python", c:"python -m venv .venv\n.venv\\Scripts\\Activate.ps1\npython scripts/cabin_check.py --help"},
+      {m:"macOS / Linux", c:"python3 -m venv .venv\nsource .venv/bin/activate\npython scripts/cabin_check.py --help"}
+    ],
+    outputs:["CVAT chạy ở `localhost:8080`","`Gxx/` có `oms/` (S01–S10), `driver/` (D01–D06), `labels_cabin_v1.json`"],
+    understand:"Chỉ chạy script trong `scripts/` của repo, không dùng `Gxx/scripts/` (bản cũ, lỗi tiếng Việt trên Windows). Ảnh nằm trong `Gxx/` đã bị `.gitignore` chặn; không commit, không gửi vào chat hay công cụ AI.",
+    notes:["Windows: nếu `python` mở Microsoft Store thì cài Python từ python.org và tick \"Add python.exe to PATH\".","`cabin_check.py` chỉ dùng thư viện chuẩn. Chỉ `rgb_ir_diff.py` cần `pip install pillow numpy`."],
+    rubric:"Điều kiện tối thiểu: không có ảnh trong file nộp.",
+    subToc:[]
+  },
+  {
+    id:"cp1", cp:"CP1", pha:"Pha 1", name:"Dựng project & task CVAT",
+    start:0, dur:15, mode:"setup", color:"#2563eb",
+    goals:[
+      "Project CVAT có đủ nhãn: person, face, face13, hand, phone, child_seat, infant_seat, object và tag `frame_meta`",
+      "Task chứa đúng 22 ảnh: S01–S08 (rgb + ir) và D01–D06",
+      "Đã đọc `RULES.md` (cá nhân/nhóm, dùng AI, giữ ảnh trong lớp)"
+    ],
+    tasks:[
+      "Projects → tạo project mới, dán toàn bộ `labels_cabin_v1.json` vào tab **Raw**, **Save** rồi kiểm tab **Constructor**",
+      "Tạo task trong project, tải 22 ảnh (S09–S10 để dành cho phần mở rộng)",
+      "Mở thử một ảnh, tìm menu vẽ bên trái và phần **DETAILS** bên phải để biết chỗ sửa thuộc tính",
+      "Nhóm: chia ai review ai (ghi sau vào `TEAM.md`)"
+    ],
+    cmds:[],
+    outputs:["Task chứa 22 ảnh, mở được từng ảnh trong CVAT"],
+    understand:"Phím tắt chỉ chạy khi khung ảnh đang được chọn (bấm vào ảnh một lần). `N` vẽ lại hình cùng loại vừa vẽ; `F`/`D` chuyển ảnh sau/trước; `Ctrl+S` để lưu.",
+    notes:["Menu vẽ ở thanh bên trái: tùy phiên bản mở khi rê chuột (v2.82) hoặc phải bấm vào biểu tượng."],
+    rubric:"E1 · Export hợp lệ, đủ 22 ảnh (10đ) bắt đầu từ task đủ ảnh.",
+    subToc:[]
+  },
+  {
+    id:"cp2", cp:"CP2", pha:"Pha 2", name:"Đọc Guideline Cabin v1.0",
+    start:15, dur:10, mode:"manual", color:"#7c3aed",
+    goals:[
+      "Nói được: ảnh bên trái = `rear_right` (camera nhìn về phía sau), ghế gọi theo xe",
+      "Biết trái/phải theo người, kể cả ảnh D## xoay ~90°",
+      "Biết khi nào ghi `unknown` và khi nào không vẽ `face13`"
+    ],
+    tasks:[
+      "Đọc `GUIDE.md`: đề bài và Guideline Cabin v1.0 (nhãn, thuộc tính)",
+      "Ghi ra giấy 5 quy tắc dễ sai nhất để nhìn lại khi gán",
+      "Xem nhanh cặp S01 rgb/ir để hiểu IR-sim khác RGB thế nào"
+    ],
+    cmds:[],
+    outputs:["Không có sản phẩm nộp — đây là bước hiểu quy tắc"],
+    understand:"Hai quy tắc dễ sai nhất: (1) **ghế theo xe, không theo ảnh**; (2) **không thấy thì `unknown`, không đoán**. `face13` chỉ vẽ khi mặt ≥ 60 px; SVIRO không có `worn_*`; ảnh thấy trẻ em thì báo coach, không gán.",
+    notes:["Ảnh SVIRO \"grayscale\" là IR **mô phỏng** (IR-sim), không phải IR thật. IR thật chỉ có ở D##."],
+    rubric:"OMS (20đ) và DMS (25đ) đều chấm theo đúng các quy tắc này.",
+    subToc:[]
+  },
+  {
+    id:"cp3", cp:"CP3", pha:"Pha 3", name:"Gán OMS S01–S02 · Checkpoint A",
+    start:25, dur:30, mode:"manual", color:"#0f766e",
+    goals:[
+      "4 ảnh S01_rgb, S01_ir, S02_rgb, S02_ir đã gán, mỗi ảnh có đúng 1 tag `frame_meta`",
+      "`check_cpA.txt` có dòng `Kết quả: 0 lỗi`"
+    ],
+    tasks:[
+      "Với mỗi ảnh: vẽ `person`, `child_seat`, `infant_seat`, `object` kèm thuộc tính `seat` theo xe",
+      "Chỉ gán những gì thấy trong chính ảnh đó, không suy từ ảnh còn lại của cặp RGB/IR",
+      "Lưu (`Ctrl+S`), export **CVAT for images 1.1**, tắt *Save images*",
+      "Tải file ở trang **Requests** (chờ *Finished* → ⋮ → Download) thành `export_final.zip`",
+      "Chạy Checkpoint A, sửa mọi ERROR rồi export lại và chạy lại"
+    ],
+    cmds:[
+      {m:"Checkpoint A — kiểm 4 ảnh đầu (dùng --out, không dùng > trên Windows)", c:"python scripts/cabin_check.py check export_final.zip --only S01,S02 --expect 4 --manifest Gxx/oms/manifest.csv --out check_cpA.txt"}
+    ],
+    outputs:["`check_cpA.txt` (E2)"],
+    understand:"Checkpoint A để bắt lỗi quy tắc sớm: lỗi gặp ở đây **không được lặp lại** ở các ảnh gán sau. `--only S01` khớp đúng mã 2 chữ số (không nhặt nhầm S10).",
+    notes:["Lỗi mã hóa tiếng Việt khi lưu báo cáo: dùng `--out`, không dùng `>`."],
+    rubric:"OMS (20đ): ghế gọi theo xe; `seatbelt` chỉ là `not_worn` hoặc `unknown`.",
+    subToc:[]
+  },
+  {
+    id:"cp4", cp:"CP4", pha:"Pha 4", name:"Gán DMS D01–D02 · Checkpoint B",
+    start:55, dur:30, mode:"manual", color:"#c2410c",
+    goals:[
+      "D01, D02 đã gán đầy đủ, mỗi ảnh 1 tag `frame_meta`",
+      "`check_cpB.txt` có dòng `Kết quả: 0 lỗi`"
+    ],
+    tasks:[
+      "Vẽ `person`, `face`, `hand`, `phone` (nếu thấy rõ vật) và `face13` với cờ điểm bị che",
+      "Gán mắt trái/phải, kính, vùng nhìn (`gaze_zone`), tay (`on_wheel`) — trái/phải theo người lái",
+      "Không vẽ `face13` nếu mặt < 60 px; điểm bị che thì đặt cờ, không đoán",
+      "Export, chạy Checkpoint B, sửa lỗi"
+    ],
+    cmds:[
+      {m:"Checkpoint B — kiểm D01, D02", c:"python scripts/cabin_check.py check export_final.zip --only D01,D02 --expect 2 --manifest Gxx/oms/manifest.csv --out check_cpB.txt"}
+    ],
+    outputs:["`check_cpB.txt` (E2)"],
+    understand:"Ảnh D## xoay ~90°: mắt trái của người lái có y lớn hơn. `on_wheel = no` là bình thường vì xe đang tự lái. Không vẽ `phone` khi không thấy rõ vật.",
+    notes:["Ảnh D## là NIR thật (Drive&Act), khác IR-sim của S##."],
+    rubric:"DMS (25đ): face13 (10đ) và thuộc tính (15đ).",
+    subToc:[]
+  },
+  {
+    id:"cp5", cp:"CP5", pha:"Pha 5", name:"Gán phần còn lại (14 ảnh)",
+    start:85, dur:35, mode:"manual", color:"#2563eb",
+    goals:[
+      "S03–S08 (12 ảnh) và D03–D06 (4 ảnh) đã gán; đủ 22 ảnh, mỗi ảnh 1 `frame_meta`"
+    ],
+    tasks:[
+      "Gán S03–S08 theo đúng quy tắc đã sửa ở Checkpoint A",
+      "Gán D03–D06 theo đúng quy tắc đã sửa ở Checkpoint B",
+      "Ghi nhanh ảnh nào RGB tối mà IR-sim thấy nhiều hơn (dùng cho `ir_log.csv`)",
+      "Lưu thường xuyên; chưa kịp thì ưu tiên đủ 22 ảnh trước, tinh chỉnh sau"
+    ],
+    cmds:[],
+    outputs:["Task CVAT gán đủ 22 ảnh"],
+    understand:"Chỉ vẽ những gì **thấy được ở chính ảnh đó**. Ảnh RGB tối mà IR-sim thấy rõ hơn không phải lý do để vẽ thêm ở RGB.",
+    notes:["Còn 20 phút mà chưa xong: đảm bảo đủ 22 ảnh có `frame_meta` rồi mới tinh chỉnh."],
+    rubric:"Lỗi gặp ở checkpoint không lặp lại ở ảnh gán sau (một phần của Review–rework, 15đ).",
+    subToc:[]
+  },
+  {
+    id:"cp6", cp:"CP6", pha:"Pha 6", name:"Kiểm lần cuối (22 ảnh)",
+    start:120, dur:10, mode:"review", color:"#b91c1c",
+    goals:[
+      "`check_final.txt` có dòng `Kết quả: 0 lỗi`, mã thoát 0",
+      "Mỗi WARN còn lại có 1 dòng giải thích ở cuối file"
+    ],
+    tasks:[
+      "Export lại toàn bộ task thành `export_final.zip`",
+      "Chạy kiểm đủ 22 ảnh, sửa tới 0 lỗi",
+      "Với mỗi WARN còn lại, thêm 1 dòng giải thích vào cuối `check_final.txt`"
+    ],
+    cmds:[
+      {m:"Kiểm lần cuối", c:"python scripts/cabin_check.py check export_final.zip --expect 22 --manifest Gxx/oms/manifest.csv --out check_final.txt"}
+    ],
+    outputs:["`export_final.zip` (E1)","`check_final.txt` (E2)"],
+    understand:"Mã thoát: 0 = không lỗi, 1 = có lỗi, 2 = không đọc được / không khớp `--only`. Coach chấm E1 bằng chính lệnh `--expect 22`.",
+    notes:[],
+    rubric:"E1 (10đ): 0 lỗi, mỗi ảnh có đúng 1 tag `frame_meta`.",
+    subToc:[]
+  },
+  {
+    id:"cp7", cp:"CP7", pha:"Pha 7", name:"Review chéo & disagreement log",
+    start:130, dur:15, mode:"review", color:"#7c3aed",
+    goals:[
+      "`disagreement_log.csv` có ≥ 5 dòng đã xử lý (hoặc tất cả nếu ít hơn 5)",
+      "Mỗi dòng có `verdict`, `guideline_rule`, `action`"
+    ],
+    tasks:[
+      "Đổi `export_final.zip` với bạn (cá nhân: với người coach ghép), chạy `diff`",
+      "Với mỗi bất đồng: xác định ai đúng **theo guideline**, ghi mục guideline liên quan",
+      "Sửa ảnh của mình nếu sai, export `export_final_v2.zip` và chạy lại kiểm (`check_final_v2.txt`)"
+    ],
+    cmds:[
+      {m:"So sánh hai bản gán (xuất CSV)", c:"python scripts/cabin_check.py diff export_final.zip peer_export_final.zip --csv disagreement_log.csv"}
+    ],
+    outputs:["`disagreement_log.csv` (E3)","`export_final_v2.zip` + `check_final_v2.txt` nếu có sửa"],
+    understand:"Hai bạn giống nhau chỉ cho thấy **nhất quán**, chưa chắc **đúng**. Coach chấm theo guideline và đáp án, không theo số dòng hai bạn thống nhất.",
+    notes:["Ca vẫn không thống nhất: ghi tên ảnh + đối tượng vào `TEAM.md` và hỏi coach."],
+    rubric:"Review–rework (15đ): đủ 3 file check, mỗi bất đồng gắn một mục guideline.",
+    subToc:[]
+  },
+  {
+    id:"cp8", cp:"CP8", pha:"Pha 8", name:"IR log & danh sách lớp v0",
+    start:145, dur:15, mode:"manual", color:"#0369a1",
+    goals:[
+      "`ir_log.csv` có ≥ 4 quan sát, cột `source` tách `real_IR` (D##) và `IR_sim` (S##)",
+      "`class_list_v0.md` có ≥ 6 lớp DMS + 6 lớp OMS và 2 câu hỏi leo thang có khung ví dụ"
+    ],
+    tasks:[
+      "Xem cặp RGB/IR-sim, ghi mỗi quan sát: khung, hiện tượng, trường nhãn bị ảnh hưởng",
+      "Điền `class_list_v0.md`: mỗi lớp có cột \"để làm gì\" cho DMS/OMS và \"nhìn thấy được trên IR?\"",
+      "Viết 2 câu hỏi leo thang kèm tên khung ví dụ và cách tạm gán"
+    ],
+    cmds:[
+      {m:"Tạo ảnh ghép RGB và IR-sim (cần pillow, numpy)", c:"python -m pip install pillow numpy\npython scripts/rgb_ir_diff.py Gxx/oms --out ir_pairs"}
+    ],
+    outputs:["`ir_log.csv` (E4)","`class_list_v0.md` (E5)"],
+    understand:"IR-sim (S##) chỉ là ảnh xám mô phỏng; chỉ D## mới là IR thật. Đừng lẫn hai loại ở cột `source`. Mỗi lớp cần trả lời: model cần nhận ra cái này **để làm gì**?",
+    notes:["`ir_log.csv`, `class_list_v0.md` có mẫu trong `templates/`."],
+    rubric:"IR (15đ) và Danh sách lớp + câu hỏi leo thang (10đ).",
+    subToc:[]
+  },
+  {
+    id:"cp9", cp:"CP9", pha:"Pha 9", name:"Tự đánh giá & exit ticket",
+    start:160, dur:15, mode:"manual", color:"#475569",
+    goals:[
+      "`self_review.md`: rà 4 cảnh và nêu 1 lỗi mình lặp lại + cách tránh",
+      "`exit_ticket.md` làm xong cá nhân; `TEAM.md` và `prompts.md` đã điền"
+    ],
+    tasks:[
+      "Chọn 4 ảnh (2 S##, 2 D##), đọc lại như người lạ, điền bảng loại lỗi (`seat_flip`, `wrong_class`, `guess`, `box`, `missing`, `extra`, `lr_flip`, `flag`, `ok`)",
+      "Làm exit ticket cá nhân, không mở slide (~10 phút)",
+      "Điền `TEAM.md` và `prompts.md` (ghi **Không dùng.** nếu không dùng AI)"
+    ],
+    cmds:[],
+    outputs:["`self_review.md`","`exit_ticket.md`","`TEAM.md`","`prompts.md`"],
+    understand:"Tự đánh giá chấm vào lỗi bạn **lặp lại** và cách tránh, không chấm số lỗi. Không đưa ảnh cabin hay ảnh tài xế (kể cả ảnh chụp màn hình) cho công cụ AI.",
+    notes:[],
+    rubric:"Tự đánh giá (5đ); `prompts.md` là điều kiện tối thiểu.",
+    subToc:[]
+  },
+  {
+    id:"submit", cp:"Nộp", pha:"Nộp bài", name:"Đóng gói & nộp",
+    start:175, dur:5, mode:"setup", color:"#15803d",
+    goals:[
+      "Thư mục `K5-L2-DAY12-<HoVaTen>-<MSSV>-DMSOMS/` đủ file theo `SUBMISSION.md`",
+      "Đã nén zip và nộp lên LMS"
+    ],
+    tasks:[
+      "`python -m zipfile -l export_final.zip` chỉ thấy `annotations.xml`, không có `.png`/`.jpg`",
+      "`check_final.txt` có dòng `Kết quả: 0 lỗi`",
+      "Tên file đúng như bảng; không kèm `manifest.csv`, ảnh hay thư mục `Gxx/`; có `prompts.md`",
+      "Nén thành `K5-L2-DAY12-<HoVaTen>-<MSSV>-DMSOMS.zip` rồi nộp tại https://aithucchien.vinuni.edu.vn"
+    ],
+    cmds:[
+      {m:"Kiểm nội dung zip export (chạy được trên Windows, macOS, Linux)", c:"python -m zipfile -l export_final.zip"}
+    ],
+    outputs:["`K5-L2-DAY12-<HoVaTen>-<MSSV>-DMSOMS.zip`"],
+    understand:"Hạn nộp chính thức: **12:00 trưa ngày hôm sau (giờ Việt Nam, GMT+7)**, trừ khi coach thông báo khác. Nộp thiếu thì coach ghi \"chưa đủ bằng chứng\" và hẹn bổ sung, không chấm 0 ngay.",
+    notes:["Coach chấm bằng script nên đặt tên file chính xác."],
+    rubric:"Điều kiện tối thiểu: có E1–E5 của chính mình, không có ảnh, có `prompts.md`.",
+    subToc:[]
+  }
+];
+const MODES = {
+  setup:  {t:"🔧 Chuẩn bị / Nộp bài",      c:"setup"},
+  manual: {t:"✋ Cá nhân · Không AI",       c:"indep"},
+  ai:     {t:"🤖 Cá nhân · Chạy model AI", c:"ai"},
+  review: {t:"🔍 Cá nhân · CVAT Review/QC",c:"review"},
+  break:  {t:"☕ Nghỉ giải lao",           c:"break"}
+};
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+function mdInline(s){
+  return esc(s)
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*([^*]+)\*/g, "<em>$1</em>")
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+}
+const pad = n => String(n).padStart(2,"0");
+function fmtHMS(ms){ ms=Math.max(0,ms); const t=Math.floor(ms/1000); const h=Math.floor(t/3600), m=Math.floor((t%3600)/60), s=t%60; return `${h}:${pad(m)}:${pad(s)}`; }
+function fmtMS(ms){ const neg=ms<0; ms=Math.abs(ms); const t=Math.ceil(ms/1000 - (neg?1:0)); const m=Math.floor(t/60), s=t%60; return (neg?"+":"")+pad(m)+":"+pad(s); }
+const fmtMin = m => Math.floor(m/60)+":"+pad(m%60);
+const clock = d => pad(d.getHours())+":"+pad(d.getMinutes());
+
+const KEY = "day12-lab-dmsoms-v1";
+let S = {acc:0, since:null, sound:true, follow:true, sel:1, viewAll:false, theme:"light", checks:{}};
+try{ const raw = localStorage.getItem(KEY); if(raw) S = Object.assign(S, JSON.parse(raw)); }catch(e){}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+const running = () => S.since !== null;
+const elapsedMs = () => Math.max(0, S.acc + (running() ? Date.now() - S.since : 0));
+function phaseIdx(min){
+  for(let i=0;i<PHASES.length;i++){
+    if(PHASES[i].dur>0 && min < PHASES[i].start + PHASES[i].dur) return i;
+  }
+  return PHASES.length-1;
+}
+
+let lastIdx = phaseIdx(elapsedMs()/60000);
+const warned = {}; let endAlerted = elapsedMs() >= TOTAL*60000;
+PHASES.forEach((p,i)=>{ if(p.dur>0){ const left = (p.start+p.dur)*60000 - elapsedMs(); if(left <= 5*60000) warned[i]=true; } });
+
+/* ---------- theme ---------- */
+function applyTheme(){
+  document.documentElement.setAttribute("data-theme", S.theme==="dark" ? "dark" : "light");
+  const bt=$("#bTheme");
+  if(bt) bt.textContent = S.theme==="dark" ? "☀️ Sáng" : "🌙 Tối";
+}
+$("#bTheme").onclick=()=>{ S.theme = S.theme==="dark"?"light":"dark"; save(); applyTheme(); };
+
+/* ---------- audio & toast ---------- */
+let AC = null;
+function ensureAudio(){ try{ if(!AC) AC = new (window.AudioContext||window.webkitAudioContext)(); if(AC.state==="suspended") AC.resume(); }catch(e){} }
+function beep(pattern){
+  if(!S.sound || !AC) return;
+  let t = AC.currentTime;
+  pattern.forEach(([f,d])=>{
+    const o=AC.createOscillator(), g=AC.createGain();
+    o.type="sine"; o.frequency.value=f; o.connect(g); g.connect(AC.destination);
+    g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.35,t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+d/1000);
+    o.start(t); o.stop(t+d/1000+0.02); t += d/1000 + 0.08;
+  });
+}
+let toastT = null;
+function toast(msg, kind="", ms=9000){
+  const el=$("#toast"); $("#toastMsg").innerHTML=msg; el.className="toast show "+kind;
+  clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove("show"), ms);
+}
+$("#toastX").onclick=()=>$("#toast").classList.remove("show");
+
+/* ---------- copy & code-tabs & lightbox ---------- */
+function copyRawText(txt, btn){
+  const done = ()=>{ const orig=btn.textContent; btn.textContent="✓ Đã copy"; setTimeout(()=>btn.textContent=orig,1400); };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(done).catch(()=>fallbackCopy(txt, done));
+  }else{ fallbackCopy(txt, done); }
+}
+function fallbackCopy(txt, cb){
+  const ta=document.createElement("textarea"); ta.value=txt; ta.style.position="fixed"; ta.style.opacity="0";
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand("copy"); cb(); }finally{ ta.remove(); }
+}
+function copyPre(btn){
+  const pre=btn.closest(".cmd").querySelector("pre");
+  const clone=pre.cloneNode(true);
+  clone.querySelectorAll(".cm").forEach(n=>n.remove());
+  copyRawText(clone.innerText.trim(), btn);
+}
+function switchTab(btn, idx){
+  const wrap=btn.closest(".code-tabs");
+  wrap.querySelectorAll(".tab-btn").forEach((b,i)=>b.classList.toggle("active", i===idx));
+  wrap.querySelectorAll(".tab-panel").forEach((p,i)=>p.classList.toggle("active", i===idx));
+}
+
+let lbFigures = []; let lbIndex = 0;
+function openLightbox(img){
+  lbFigures = Array.from(document.querySelectorAll("#panelHost .lab-figure img"));
+  lbIndex = Math.max(0, lbFigures.indexOf(img));
+  showLightbox();
+}
+function showLightbox(){
+  const img=lbFigures[lbIndex]; if(!img) return;
+  $("#lbImg").src=img.src; $("#lbImg").alt=img.alt;
+  const cap=img.closest("figure").querySelector("figcaption");
+  $("#lbCap").textContent=cap ? cap.textContent : img.alt;
+  $("#lbIdx").textContent=`Ảnh ${lbIndex+1} / ${lbFigures.length}`;
+  $("#lightbox").classList.add("open");
+}
+function closeLightbox(){ $("#lightbox").classList.remove("open"); }
+function stepLightbox(d){ lbIndex=(lbIndex+d+lbFigures.length)%lbFigures.length; showLightbox(); }
+
+/* ---------- timeline & stepper ---------- */
+function buildTimeline(){
+  const tr=$("#track"), tk=$("#ticks");
+  PHASES.forEach((p,i)=>{
+    if(p.dur<=0) return;
+    const d=document.createElement("div"); d.className="seg"; d.dataset.i=i;
+    d.style.width=(p.dur/TOTAL*100)+"%"; d.style.background=p.color;
+    d.innerHTML=`${p.cp}<small>${esc(p.name)}</small>`; d.title=`${p.pha} · ${p.name} (${p.dur}′)`;
+    d.onclick=()=>select(i,true); tr.insertBefore(d, $("#needle"));
+    const t=document.createElement("div"); t.className="tick"; t.style.left=((p.start+p.dur)/TOTAL*100)+"%";
+    if(p.id==="cp2"||p.id==="cp6"||p.id==="cp9") t.classList.add("tick-stagger");
+    
+    t.innerHTML=`<b>${p.id==="break"?"&nbsp;":(p.id==="submit"?"✓":p.cp)}</b>${fmtMin(p.start+p.dur)}`;
+    if(i===PHASES.length-2) t.style.transform="translateX(-100%)";
+    if(i===PHASES.length-1) t.style.transform="translateX(-100%)";
+    tk.appendChild(t);
+  });
+}
+function buildStepper(){
+  const st=$("#stepper"); st.innerHTML="";
+  PHASES.forEach((p,i)=>{
+    const d=document.createElement("div"); d.className="step"; d.dataset.i=i;
+    const tmStr = p.dur>0 ? `${p.pha} · ${fmtMin(p.start)} → ${fmtMin(p.start+p.dur)} · ${p.dur}′` : `${p.pha} · ${p.prepLabel}`;
+    d.innerHTML=`<div class="dot" style="background:${p.color}">${p.cp}</div>
+      <div><div class="nm">${esc(p.name)}</div><div class="tm">${tmStr}</div></div>
+      <div class="cnt" id="cnt${i}"></div>`;
+    d.onclick=()=>{
+      if(S.viewAll){
+        const target = document.getElementById("panel-"+p.id);
+        if(target) target.scrollIntoView({behavior:"smooth", block:"start"});
+        S.sel=i; paintSel();
+      }else{ select(i,true); }
+    };
+    st.appendChild(d);
+  });
+  const b=document.createElement("button"); b.className="btn follow"; b.id="bFollow";
+  b.onclick=()=>{ S.follow=true; if(S.viewAll){ S.viewAll=false; refreshViewBtn(); } select(lastIdx,false); save(); refreshFollow(); };
+  st.appendChild(b);
+
+  const toc=document.createElement("div"); toc.className="toc-box"; toc.id="sidebarToc";
+  st.appendChild(toc);
+  refreshFollow(); refreshCounts(); renderSidebarToc();
+}
+function renderSidebarToc(){
+  const toc=$("#sidebarToc"); if(!toc) return;
+  if(S.viewAll){
+    toc.innerHTML = `<div class="toc-title">Mục lục toàn bài</div>` +
+      PHASES.map(p=>`<a class="toc-link" href="#panel-${p.id}">${p.cp} · ${esc(p.name)}</a>`).join("") +
+      `<a class="toc-link" href="#refSection">📏 Ngưỡng &amp; Quy tắc vàng</a>`;
+  }else{
+    const p=PHASES[S.sel];
+    const sub=(p.subToc||[]).map(x=>`<a class="toc-link sub" href="#${x[0]}">${esc(x[1])}</a>`).join("");
+    toc.innerHTML = `<div class="toc-title">Mục lục ${p.cp}</div>
+      <a class="toc-link" href="#${p.id}-goals">🎯 Mục tiêu cần đạt</a>
+      <a class="toc-link" href="#${p.id}-tasks">✅ Việc cần làm</a>
+      ${p.cmds.length?`<a class="toc-link" href="#${p.id}-cmds">⌨️ Lệnh chạy nhanh</a>`:""}
+      <a class="toc-link" href="#${p.id}-deep">🖼️ Chi tiết &amp; Ảnh mẫu</a>
+      ${sub}
+      <a class="toc-link" href="#refSection">📏 Ngưỡng &amp; Quy tắc</a>`;
+  }
+}
+function refreshFollow(){ const b=$("#bFollow"); if(!b) return; b.textContent = S.follow ? "✓ Đang tự theo pha hiện tại" : "↻ Theo pha hiện tại"; b.classList.toggle("on",S.follow); }
+function refreshCounts(){
+  PHASES.forEach((p,i)=>{ const c=S.checks[p.id]||{}; const n=p.tasks.filter((_,k)=>c["t"+k]).length; const g=p.goals.filter((_,k)=>c["g"+k]).length;
+    const el=$("#cnt"+i); if(el) el.textContent = `${n+g}/${p.tasks.length+p.goals.length}`; });
+}
+function refreshViewBtn(){
+  const b=$("#bViewAll");
+  if(b){ b.textContent = S.viewAll ? "⏱ Xem theo pha" : "📖 Xem tất cả"; b.classList.toggle("on", S.viewAll); }
+}
+
+/* ---------- panels ---------- */
+function stashAllDeepBlocks(){
+  const arch=$("#deepArchive");
+  document.querySelectorAll(".deep-panel").forEach(el=>arch.appendChild(el));
+}
+function chkListHtml(p, arr, prefix, numbered){
+  const c=S.checks[p.id]||{};
+  return `<ul class="chk">${arr.map((t,k)=>{const on=!!c[prefix+k];
+    return `<li class="${on?"checked":""}"><input type="checkbox" data-p="${p.id}" data-k="${prefix+k}" ${on?"checked":""}><span>${numbered?`<span class="num">${k+1}.</span>`:""}${mdInline(t)}</span></li>`;}).join("")}</ul>`;
+}
+function buildPhaseCard(p, startWall){
+  const m=MODES[p.mode];
+  const at=min=>clock(new Date(startWall.getTime()+min*60000));
+  const card=document.createElement("section");
+  card.className="panel"; card.id="panel-"+p.id; card.style.setProperty("--pc",p.color);
+  const metaTime = p.dur>0
+    ? `<span>⏱ <b>${fmtMin(p.start)} → ${fmtMin(p.start+p.dur)}</b> · ${p.dur} phút</span><span class="wall-clock-wrap">🕘 Giờ dự kiến: <b class="wall-clock" data-s="${p.start}" data-e="${p.start+p.dur}">${at(p.start)} → ${at(p.start+p.dur)}</b></span>`
+    : `<span>⏱ <b>${esc(p.prepLabel)}</b> (làm trước buổi thực hành)</span>`;
+  card.innerHTML=`
+    <div class="p-head">
+      <span class="cpb" style="background:${p.color};font-size:14px;padding:4px 12px">${p.cp}</span>
+      <h2>${p.pha} · ${esc(p.name)}</h2>
+      <div class="p-actions hide-present">
+        ${p.dur>0?`<button type="button" class="btn" data-jump="${p.start}" data-pname="${esc(p.pha+' · '+p.name)}" title="Đặt đồng hồ về đầu pha này">⤒ Nhảy tới đầu pha</button>`:""}
+      </div>
+    </div>
+    <div class="p-meta">
+      <span class="mode ${m.c}">${m.t}</span>
+      ${metaTime}
+    </div>
+    <div class="goalbox" id="${p.id}-goals">
+      <h3>🎯 Mục tiêu cần đạt ${p.id==="break"?"trước Pha 4":"tại "+p.cp+" (tự kiểm tra)"}</h3>
+      ${chkListHtml(p,p.goals,"g",false)}
+    </div>
+    <div class="cols">
+      <div>
+        <div class="sec" id="${p.id}-tasks"><h3>✅ Việc cần làm</h3>${chkListHtml(p,p.tasks,"t",true)}</div>
+      </div>
+      <div>
+        ${p.outputs.length?`<div class="sec"><h3>📦 Sản phẩm cần có</h3><ul class="plain">${p.outputs.map(o=>`<li>${mdInline(o)}</li>`).join("")}</ul></div>`:""}
+        <div class="sec"><div class="q"><b class="qtitle">💡 Cần hiểu ở mốc này</b>${mdInline(p.understand)}</div></div>
+        ${p.notes.length?`<div class="sec">${p.notes.map(n=>`<div class="note">${mdInline(n)}</div>`).join("")}</div>`:""}
+        ${p.cmds.length?`<div class="sec hide-present" id="${p.id}-cmds"><h3>⌨️ Lệnh chính (từ thư mục gốc repo)</h3>${p.cmds.map(c=>`<div class="cmd"><pre>${c.m?`<span class="cm"># ${esc(c.m)}\n</span>`:""}${esc(c.c)}</pre><button type="button" onclick="copyPre(this)">Copy</button></div>`).join("")}</div>`:""}
+        ${p.rubric?`<div class="sec hide-present"><h3>🏁 Rubric liên quan</h3><div class="rub">${mdInline(p.rubric)}</div></div>`:""}
+      </div>
+    </div>
+    <div class="deep-wrap" id="${p.id}-deep">
+      <div class="deep-banner">
+        <h3>🖼️ Hướng dẫn chi tiết, ảnh chụp CVAT/Model thực tế &amp; hướng dẫn theo hệ điều hành</h3>
+        <button type="button" class="btn hide-present" onclick="toggleDeep(this)">Thu gọn / Mở chi tiết</button>
+      </div>
+      <div class="deep-slot"></div>
+    </div>`;
+  const deepEl=$(`.deep-panel[data-deep-id="${p.id}"]`);
+  if(deepEl) card.querySelector(".deep-slot").appendChild(deepEl);
+  return card;
+}
+function toggleDeep(btn){
+  const slot=btn.closest(".deep-wrap").querySelector(".deep-slot");
+  slot.hidden=!slot.hidden;
+}
+function wrapNoSplit(root){
+  if(!root) return;
+  const tokRe=/(?:--[A-Za-z0-9][A-Za-z0-9_-]*|[A-Za-z0-9_]+(?:-[A-Za-z0-9_]+)+\.[A-Za-z0-9]{1,8}|pre_traps(?:_import)?\.coco\.json)/g;
+  root.querySelectorAll("code, .cmd pre").forEach(el=>{
+    if(el.dataset.nwDone) return;
+    el.dataset.nwDone="1";
+    const w=document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null);
+    const nodes=[];
+    let n;
+    while((n=w.nextNode())){
+      if(n.parentElement && n.parentElement.closest(".cm,.nw")) continue;
+      if(tokRe.test(n.nodeValue)) nodes.push(n);
+      tokRe.lastIndex=0;
+    }
+    nodes.forEach(tn=>{
+      const txt=tn.nodeValue;
+      tokRe.lastIndex=0;
+      const frag=document.createDocumentFragment();
+      let last=0, m;
+      while((m=tokRe.exec(txt))!==null){
+        if(m.index>last) frag.appendChild(document.createTextNode(txt.slice(last, m.index)));
+        if(m[0].length<=26){
+          const sp=document.createElement("span");
+          sp.className="nw";
+          sp.textContent=m[0];
+          frag.appendChild(sp);
+        }else{
+          frag.appendChild(document.createTextNode(m[0]));
+        }
+        last=m.index+m[0].length;
+      }
+      if(last<txt.length) frag.appendChild(document.createTextNode(txt.slice(last)));
+      tn.parentNode.replaceChild(frag, tn);
+    });
+  });
+}
+function renderPanels(){
+  stashAllDeepBlocks();
+  const host=$("#panelHost"); host.innerHTML="";
+  const startWall=new Date(Date.now()-elapsedMs());
+  const list=S.viewAll ? PHASES : [PHASES[S.sel]];
+  list.forEach(p=>host.appendChild(buildPhaseCard(p, startWall)));
+
+  host.querySelectorAll("input[type=checkbox][data-p]").forEach(cb=>cb.onchange=()=>{
+    const id=cb.dataset.p; S.checks[id]=S.checks[id]||{}; S.checks[id][cb.dataset.k]=cb.checked;
+    cb.closest("li").classList.toggle("checked",cb.checked); save(); refreshCounts();
+  });
+  host.querySelectorAll("[data-jump]").forEach(b=>b.onclick=()=>{
+    setElapsed((+b.dataset.jump)*60000); S.follow=true; save(); refreshFollow();
+    toast(`Đồng hồ đặt về đầu <b>${esc(b.dataset.pname)}</b>`,"",3500);
+  });
+  wrapNoSplit(host);
+  renderSidebarToc();
+}
+
+function select(i, manual){
+  S.sel=i;
+  if(manual && i!==lastIdx) S.follow=false;
+  if(manual && i===lastIdx) S.follow=true;
+  save(); renderPanels(); refreshFollow(); paintSel();
+}
+function paintSel(){
+  document.querySelectorAll(".step").forEach(el=>el.classList.toggle("sel", +el.dataset.i===S.sel));
+  document.querySelectorAll(".seg").forEach(el=>el.classList.toggle("sel", +el.dataset.i===S.sel));
+}
+
+/* ---------- timer & controls ---------- */
+function setElapsed(ms){
+  ms=Math.max(0,ms); S.acc=ms; if(running()) S.since=Date.now();
+  lastIdx=phaseIdx(ms/60000);
+  PHASES.forEach((p,i)=>{ if(p.dur>0) warned[i] = (p.start+p.dur)*60000 - ms <= 5*60000; });
+  endAlerted = ms >= TOTAL*60000;
+  if(S.follow){ S.sel=lastIdx; renderPanels(); paintSel(); }
+  refreshWallClocks();
+  save(); tick();
+}
+function toggle(){
+  ensureAudio();
+  if(running()){ S.acc=elapsedMs(); S.since=null; }
+  else {
+    S.since=Date.now();
+    if(elapsedMs()===0) toast(`▶ Bắt đầu! <b>${PHASES[lastIdx].pha} · ${PHASES[lastIdx].name}</b>: ${PHASES[lastIdx].dur} phút`,"go",4500);
+    beep([[660,120]]);
+  }
+  save(); tick();
+}
+$("#bStart").onclick=toggle;
+document.querySelectorAll("[data-adj]").forEach(b=>b.onclick=()=>setElapsed(elapsedMs()+(+b.dataset.adj)*60000));
+$("#bViewAll").onclick=()=>{ S.viewAll=!S.viewAll; save(); refreshViewBtn(); renderPanels(); };
+let resetArm=null;
+$("#bReset").onclick=()=>{
+  const b=$("#bReset");
+  if(!resetArm){ b.textContent="Bấm lần nữa để đặt lại"; resetArm=setTimeout(()=>{b.textContent="↺ Đặt lại"; resetArm=null;},3000); return; }
+  clearTimeout(resetArm); resetArm=null; b.textContent="↺ Đặt lại";
+  S.since=null; S.checks={}; S.follow=true; setElapsed(0); renderPanels(); refreshCounts(); refreshFollow();
+};
+$("#bSync").onclick=()=>{
+  const v=$("#syncTime").value; if(!v){ toast("Chọn giờ lớp bắt đầu trước (ví dụ 08:00).","warn",4000); return; }
+  ensureAudio();
+  const [h,m]=v.split(":").map(Number); const d=new Date(); d.setHours(h,m,0,0);
+  const diff=Date.now()-d.getTime();
+  if(diff<0){ toast("Giờ bắt đầu nằm ở tương lai. Kiểm tra lại giờ đã nhập.","warn",4500); return; }
+  S.since=Date.now(); S.follow=true; setElapsed(diff);
+  toast(`Đã đồng bộ: lớp bắt đầu lúc <b>${v}</b>, đã trôi ${fmtHMS(diff)}`,"go",4500);
+};
+function refreshSound(){ const b=$("#bSound"); b.textContent = S.sound?"🔔 Âm báo":"🔕 Tắt âm"; b.classList.toggle("on",!S.sound); }
+$("#bSound").onclick=()=>{ S.sound=!S.sound; ensureAudio(); save(); refreshSound(); if(S.sound) beep([[880,100]]); };
+$("#bPresent").onclick=()=>{ document.body.classList.toggle("present"); $("#bPresent").classList.toggle("on"); };
+$("#bFull").onclick=()=>{ try{ if(!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }catch(e){} };
+
+document.addEventListener("keydown",e=>{
+  if($("#lightbox").classList.contains("open")){
+    if(e.key==="Escape") closeLightbox();
+    if(e.key==="ArrowLeft") stepLightbox(-1);
+    if(e.key==="ArrowRight") stepLightbox(1);
+    return;
+  }
+  if(e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA") return;
+  if(e.code==="Space"){ e.preventDefault(); toggle(); }
+  else if(e.key==="ArrowRight") select(Math.min(PHASES.length-1,S.sel+1),true);
+  else if(e.key==="ArrowLeft") select(Math.max(0,S.sel-1),true);
+  else if(e.key==="p"||e.key==="P") $("#bPresent").click();
+  else if(e.key==="f"||e.key==="F") $("#bFull").click();
+  else if(e.key==="t"||e.key==="T") $("#bTheme").click();
+});
+
+function tick(){
+  const ms=elapsedMs(), min=ms/60000, i=phaseIdx(min), p=PHASES[i];
+  const endMs=(p.start+p.dur)*60000, left=endMs-ms, over=ms>=TOTAL*60000;
+
+  if(i!==lastIdx){
+    if(running() && i>lastIdx){
+      const prev=PHASES[lastIdx];
+      const chk=prev.id==="break"?"":` Tự kiểm tra <b>${prev.cp}</b>.`;
+      toast(`⏰ Hết giờ <b>${prev.pha} · ${esc(prev.name)}</b>.${chk} Bắt đầu <b>${p.pha} · ${esc(p.name)}</b> (${p.dur}′)`,"go",15000);
+      beep([[784,180],[988,180],[1175,320]]);
+    }
+    lastIdx=i; if(S.follow){ S.sel=i; renderPanels(); paintSel(); } refreshFollow();
+  }
+  if(running() && !warned[i] && left<=5*60000 && left>0 && p.dur>5){
+    warned[i]=true; toast(`⚠️ Còn 5 phút cho <b>${p.pha} · ${esc(p.name)}</b>. Chuẩn bị chốt ${p.id==="break"?"và quay lại lớp":"bằng chứng cho "+p.cp}.`,"warn",10000); beep([[660,200],[660,200]]);
+  }
+  if(running() && over && !endAlerted){
+    endAlerted=true; toast("🏁 Hết 4 giờ! Chạy <code>python scripts/check_submission.py</code> và nộp theo <code>SUBMISSION.md</code>.","warn",20000);
+    beep([[523,250],[659,250],[784,250],[1047,500]]);
+  }
+
+  const now=$("#now"); now.style.setProperty("--pc",p.color);
+  now.classList.toggle("warn", !over && left<=5*60000); now.classList.toggle("over", over);
+  $("#nowCp").textContent=p.cp; $("#nowCp").style.background=p.color;
+  $("#nowName").textContent=`${p.pha} · ${p.name}`;
+  const m=MODES[p.mode]; const nm=$("#nowMode"); nm.textContent=m.t; nm.className="mode "+m.c;
+  $("#nowLeft").textContent=fmtMS(left);
+  $("#nowSub").innerHTML=over ? `<b>Quá giờ</b> so với kế hoạch 180 phút` :
+    (p.id==="break" ? `Còn lại của giờ nghỉ · Pha 4 bắt đầu lúc <b>${fmtMin(p.start+p.dur)}</b>` : `Còn lại tới mốc <b>${p.cp}</b> (phút ${fmtMin(p.start+p.dur)})`);
+  $("#nowBar").style.width=Math.min(100,(ms-p.start*60000)/(p.dur*60000)*100)+"%";
+  const pill=$("#statePill"); pill.textContent=running() ? "● Đang chạy" : (ms>0?"❚❚ Tạm dừng":"Chưa bắt đầu"); pill.classList.toggle("run",running());
+  $("#bStart").textContent=running() ? "❚❚ Tạm dừng" : (ms>0 ? "▶ Tiếp tục" : "▶ Bắt đầu");
+
+  $("#tElapsed").textContent=fmtHMS(ms);
+  $("#tLeft").textContent=fmtHMS(TOTAL*60000-ms);
+  const nowD=new Date(); $("#tClock").textContent=clock(nowD);
+  $("#tEnd").textContent=clock(new Date(nowD.getTime()+TOTAL*60000-ms));
+  const nxt=PHASES.slice(i).find(q=>q.dur>0 && q.id!=="break" && (q.start+q.dur)*60000>ms);
+  $("#tNext").innerHTML=over ? "🏁 Đã hết thời gian dự kiến. Kiểm tra bằng <code>check_submission.py</code> và nộp bài." :
+    (nxt ? `Mốc tiếp theo: <b>${nxt.cp} · ${esc(nxt.name)}</b> lúc phút ${fmtMin(nxt.start+nxt.dur)} (khoảng <b>${clock(new Date(nowD.getTime()+(nxt.start+nxt.dur)*60000-ms))}</b>), còn ${fmtHMS((nxt.start+nxt.dur)*60000-ms).replace(/^0:/,"")}` : "");
+
+  $("#needle").style.left=Math.min(100,ms/(TOTAL*60000)*100)+"%";
+  $("#tlPct").textContent=Math.min(100,Math.round(ms/(TOTAL*60000)*100))+"%";
+  document.querySelectorAll(".seg").forEach(el=>{
+    const k=+el.dataset.i;
+    el.classList.toggle("cur", k===i && !over);
+    el.classList.toggle("done", k<i || over);
+  });
+  document.querySelectorAll(".step").forEach(el=>{
+    const k=+el.dataset.i;
+    if(PHASES[k].dur>0){
+      el.classList.toggle("cur", k===i && !over);
+      el.classList.toggle("done", k<i || over);
+    }
+  });
+}
+
+const IS_PRINT = new URLSearchParams(location.search).get("print")==="1";
+if(IS_PRINT){
+  S.theme="light"; S.viewAll=true;
+  document.body.classList.add("print-mode");
+}
+applyTheme(); buildTimeline(); buildStepper(); refreshSound(); refreshViewBtn();
+if(S.follow && !S.viewAll && !IS_PRINT) S.sel=lastIdx;
+renderPanels(); wrapNoSplit(document.getElementById("refSection")); paintSel(); tick();
+
+let _prePrintState = null;
+window.addEventListener("beforeprint", ()=>{
+  _prePrintState = {viewAll:S.viewAll, theme:S.theme};
+  S.viewAll=true; S.theme="light"; applyTheme(); renderPanels();
+});
+window.addEventListener("afterprint", ()=>{
+  if(_prePrintState && !IS_PRINT){
+    S.viewAll=_prePrintState.viewAll; S.theme=_prePrintState.theme;
+    applyTheme(); refreshViewBtn(); renderPanels(); paintSel();
+  }
+  _prePrintState=null;
+});
+
+function refreshWallClocks(){
+  const startWall=new Date(Date.now()-elapsedMs());
+  const at=min=>clock(new Date(startWall.getTime()+min*60000));
+  document.querySelectorAll(".wall-clock").forEach(el=>{
+    el.textContent=`${at(+el.dataset.s)} → ${at(+el.dataset.e)}`;
+  });
+}
+setInterval(tick, 250);
+setInterval(refreshWallClocks, 15000);
+</script>
+</body>
+</html>
